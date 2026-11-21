@@ -5,6 +5,7 @@
 ## Version: @project-version@
 ## IconTexture: Interface/Icons/Ability_DualWield
 ## SavedVariablesPerCharacter: AutoRoleDB
+## X-Curse-Project-ID: 1821845
 
 Output.lua
 Store.lua
