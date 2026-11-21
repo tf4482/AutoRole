@@ -1,4 +1,4 @@
-## Interface: 16001, 120105
+## Interface: 16001
 ## Title: AutoRole
 ## Notes: Sets your group role automatically on joining, per dual spec
 ## Author: tf4482
