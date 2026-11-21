@@ -15,6 +15,12 @@ without dual spec.
   from the addon compartment menu.
 - **Chat commands** - every option can also be changed by slash command.
 
+## Screenshots
+
+![Role set on joining a group](docs/chat.png)
+
+![Settings page](docs/settings.png)
+
 ## Install
 
 1. Download `AutoRole-vX.Y.Z.zip` from the releases (or CurseForge, Wago).
