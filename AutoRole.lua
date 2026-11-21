@@ -58,13 +58,16 @@ local function Status()
   end
 end
 
+-- set the role now, or right after combat
+local function Refresh()
+  ns.AfterCombat(Apply)
+end
+
 -- event handlers by event name
 local events = {}
 
--- joined a group: set the role now or right after combat
-function events.GROUP_JOINED()
-  ns.AfterCombat(Apply)
-end
+-- joined a group: set the role
+events.GROUP_JOINED = Refresh
 
 -- one frame dispatching all events above
 local frame = CreateFrame("Frame")
@@ -78,9 +81,9 @@ end)
 -- saved state per character; settings page once loaded
 ns.Store("AutoRoleDB", { spec1 = "NONE", spec2 = "NONE" }, function()
   ns.Settings()
-  ns.Dropdown("spec1", "Role for spec 1", ROLES, "Role set on joining a group while spec 1 is active; your only spec without dual spec")
+  ns.Dropdown("spec1", "Role for spec 1", ROLES, "Role set on joining a group while spec 1 is active; your only spec without dual spec", Refresh)
   ns.Dropdown("spec2", "Role for spec 2", ROLES,
-    "Role set on joining a group while spec 2 is active; needs dual spec")
+    "Role set on joining a group while spec 2 is active; needs dual spec", Refresh)
 end)
 
 -- chat command per spec: set its role and report it
