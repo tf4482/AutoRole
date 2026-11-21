@@ -1,0 +1,14 @@
+## Interface: 16001, 120105
+## Title: AutoRole
+## Notes: Sets your group role automatically on joining, per dual spec
+## Author: tf4482
+## Version: @project-version@
+## IconTexture: Interface/Icons/Ability_DualWield
+## SavedVariablesPerCharacter: AutoRoleDB
+
+Output.lua
+Store.lua
+Combat.lua
+Settings.lua
+Slash.lua
+AutoRole.lua
