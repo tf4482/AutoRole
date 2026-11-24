@@ -16,6 +16,9 @@ for _, role in ipairs(ROLES) do
   LABELS[role[1]] = role[2]
 end
 
+-- format of the per-character data, for migration
+local CHAR_VERSION = 1
+
 -- dual spec API differs between game versions
 local GetNumGroups = GetNumSpecGroups or GetNumTalentGroups
 local GetActiveGroup = GetActiveSpecGroup or GetActiveTalentGroup
@@ -33,12 +36,14 @@ end
 -- set the configured role of the active spec; only called out of combat
 local function Apply()
   if not IsInGroup() then
+    ns.Debug("not in a group, role unchanged")
     return
   end
   local spec = ActiveSpec()
-  local role = ns.db["spec" .. spec]
+  local role = ns.Get("spec" .. spec)
   -- unknown spec index or bad saved value: leave the role alone
   if not LABELS[role] or role == "NONE" or UnitGroupRolesAssigned("player") == role then
+    ns.Debug("spec " .. spec .. ": role " .. tostring(role) .. " not applied")
     return
   end
   UnitSetRole("player", role)
@@ -49,14 +54,19 @@ end
 local function Status()
   local active, learned = ActiveSpec(), NumSpecs()
   for spec = 1, 2 do
+    local role = ns.Get("spec" .. spec)
     local hint = ""
     if spec > learned then
       hint = ns.Color("warning", " (dual spec not learned)")
     elseif spec == active then
       hint = ns.Color("success", " (active)")
     end
-    ns.Status("spec " .. spec, (LABELS[ns.db["spec" .. spec]] or tostring(ns.db["spec" .. spec])) .. hint)
+    ns.Status("spec " .. spec, (LABELS[role] or tostring(role)) .. hint)
   end
+  if not IsInGroup() then
+    ns.Detail(ns.Color("muted", "not in a group: the role is set on the next join"))
+  end
+  ns.Status("per character", ns.OnOff(ns.char.perCharacter))
 end
 
 -- set the role now, or right after combat
@@ -64,13 +74,37 @@ local function Refresh()
   ns.AfterCombat(Apply)
 end
 
+-- switch per-character settings and report the new state
+local function PerCharacter(enabled)
+  ns.Set("perCharacter", enabled)
+  Status()
+end
+
+-- set the role of the active spec once now, for checking it in game
+local function Test()
+  ns.Print("test: role of spec " .. ActiveSpec())
+  if not IsInGroup() then
+    ns.Warn("not in a group: role unchanged")
+  elseif InCombatLockdown() then
+    ns.Warn("in combat: role set after combat")
+  end
+  Refresh()
+end
+
 -- event handlers by event name
 local events = {}
 
 -- joined a group: set the role
-events.GROUP_JOINED = Refresh
+function events.GROUP_JOINED()
+  ns.Debug("GROUP_JOINED fired")
+  Refresh()
+end
+
 -- switched spec: set the role of the new spec (Apply skips when not grouped)
-events.ACTIVE_TALENT_GROUP_CHANGED = Refresh
+function events.ACTIVE_TALENT_GROUP_CHANGED()
+  ns.Debug("ACTIVE_TALENT_GROUP_CHANGED fired")
+  Refresh()
+end
 
 -- one frame dispatching all events above
 local frame = CreateFrame("Frame")
@@ -86,10 +120,27 @@ frame:SetScript("OnEvent", function(_, event, ...)
   events[event](...)
 end)
 
--- saved state per character; settings page once loaded
-ns.Store("AutoRoleDB", { spec1 = "NONE", spec2 = "NONE" }, function()
+-- spec roles are per character by nature; one-time copy of the roles 0.1.x kept in the
+-- per-character AutoRoleDB; _version 0 marks unmigrated data
+ns.Store("AutoRoleCharDB", { _version = 0, spec1 = "NONE", spec2 = "NONE" }, function(char)
+  if char._version > CHAR_VERSION then
+    ns.Warn("saved data is newer than this version; update AutoRole")
+  elseif char._version < CHAR_VERSION then
+    for spec = 1, 2 do
+      local old = ns.db["spec" .. spec]
+      if LABELS[old] then
+        char["spec" .. spec] = old
+      end
+    end
+    char._version = CHAR_VERSION
+  end
+end, "char")
+
+-- saved state; settings page once loaded
+ns.Store("AutoRoleDB", {}, function()
   ns.Settings()
-  ns.Dropdown("spec1", "Role for spec 1", ROLES, "Role set on joining a group while spec 1 is active; your only spec without dual spec", Refresh)
+  ns.Dropdown("spec1", "Role for spec 1", ROLES,
+    "Role set on joining a group while spec 1 is active; your only spec without dual spec", Refresh)
   ns.Dropdown("spec2", "Role for spec 2", ROLES,
     "Role set on joining a group while spec 2 is active; needs dual spec", Refresh)
 end)
@@ -106,5 +157,30 @@ for spec = 1, 2 do
     end,
   })
 end
+ns.Command({
+  name = "character",
+  help = "use settings for this character only, or the account's",
+  args = { { name = "state", choices = { "on", "off" } } },
+  run = function(args) PerCharacter(args.state == "on") end,
+})
+ns.Command({ name = "test", help = "set the role of the active spec once now", run = Test })
+ns.Command({
+  name = "reset",
+  help = "reset the active profile's settings to defaults",
+  run = function()
+    ns.ResetSettings()
+    ns.Success("settings reset to defaults")
+    Status()
+  end,
+})
+ns.Command({
+  name = "debug",
+  help = "show what the addon does in chat, until /reload",
+  args = { { name = "state", choices = { "on", "off" } } },
+  run = function(args)
+    ns.debug = args.state == "on"
+    ns.Status("debug", ns.OnOff(ns.debug))
+  end,
+})
 ns.Command({ name = "config", help = "open the settings page", run = ns.OpenSettings })
 ns.Slash({ "/autorole", "/ar" }, Status)
