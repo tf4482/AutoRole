@@ -1,12 +1,13 @@
 # AutoRole
 
-Sets your group role (tank, healer, damage) automatically when you join a group, with or
-without dual spec.
+Sets your group role (tank, healer, damage) automatically when you join a group or switch
+spec, with or without dual spec.
 
 ## Features
 
 - **Auto role on join** - on joining a group, your role is set to the one configured for
   the active spec.
+- **Spec switch** - switching spec while in a group sets the role of the new spec.
 - **Live change** - changing the role of the active spec while in a group sets it right away.
 - **Without dual spec** - spec 1 is your only spec; its role applies on every join.
 - **Per dual spec** - one role for spec 1 and one for spec 2; spec 2 can be set in advance

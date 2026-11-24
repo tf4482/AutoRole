@@ -4,6 +4,13 @@ All notable changes to this project are documented in this file.
 The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and
 [Semantic Versioning](https://semver.org/).
 
+## [Unreleased]
+
+### Fixed
+
+- Switching spec while in a group now sets the role of the new spec
+- An unknown spec index or saved role no longer causes a Lua error
+
 ## [0.1.1] - 2026-11-21
 
 ### Changed

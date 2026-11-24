@@ -1,4 +1,4 @@
--- AutoRole: sets the player's group role on joining a group, per dual spec
+-- AutoRole: sets the player's group role on joining a group or switching spec, per dual spec
 
 local _, ns = ...
 
@@ -37,7 +37,8 @@ local function Apply()
   end
   local spec = ActiveSpec()
   local role = ns.db["spec" .. spec]
-  if role == "NONE" or UnitGroupRolesAssigned("player") == role then
+  -- unknown spec index or bad saved value: leave the role alone
+  if not LABELS[role] or role == "NONE" or UnitGroupRolesAssigned("player") == role then
     return
   end
   UnitSetRole("player", role)
@@ -54,7 +55,7 @@ local function Status()
     elseif spec == active then
       hint = ns.Color("success", " (active)")
     end
-    ns.Status("spec " .. spec, LABELS[ns.db["spec" .. spec]] .. hint)
+    ns.Status("spec " .. spec, (LABELS[ns.db["spec" .. spec]] or tostring(ns.db["spec" .. spec])) .. hint)
   end
 end
 
@@ -68,11 +69,18 @@ local events = {}
 
 -- joined a group: set the role
 events.GROUP_JOINED = Refresh
+-- switched spec: set the role of the new spec (Apply skips when not grouped)
+events.ACTIVE_TALENT_GROUP_CHANGED = Refresh
 
 -- one frame dispatching all events above
 local frame = CreateFrame("Frame")
 for event in pairs(events) do
-  frame:RegisterEvent(event)
+  -- skip events this client does not know; pcall when it cannot tell
+  if not (C_EventUtils and C_EventUtils.IsEventValid) then
+    pcall(frame.RegisterEvent, frame, event)
+  elseif C_EventUtils.IsEventValid(event) then
+    frame:RegisterEvent(event)
+  end
 end
 frame:SetScript("OnEvent", function(_, event, ...)
   events[event](...)
