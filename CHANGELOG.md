@@ -6,10 +6,22 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and
 
 ## [Unreleased]
 
+### Added
+
+- `character on|off`, `test`, `reset`, and `debug on|off` chat commands
+- "Per character" checkbox on the settings page
+- Addon icon in the addon list and compartment menu
+
+### Changed
+
+- Spec roles are saved in `AutoRoleCharDB`; roles from 0.1.x are copied over once
+- Shared components updated to the current house versions
+
 ### Fixed
 
 - Switching spec while in a group now sets the role of the new spec
 - An unknown spec index or saved role no longer causes a Lua error
+- `VERSION` matches the release tag v0.1.1
 
 ## [0.1.1] - 2026-11-21
 
