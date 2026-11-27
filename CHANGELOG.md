@@ -16,6 +16,7 @@ The format follows [Keep a Changelog](https://keepachangelog.com/en/1.1.0/) and
 
 - Spec roles are saved in `AutoRoleCharDB`; roles from 0.1.x are copied over once
 - Shared components updated to the current house versions
+- Wider dropdowns on the settings page, without the arrows beside them
 
 ### Fixed
 
