@@ -20,6 +20,7 @@
     "IsInRaid",
     "MinimalSliderWithSteppersMixin",
     "Settings",
+    "SettingsDropdownControlMixin",
     "GetActiveSpecGroup",
     "GetActiveTalentGroup",
     "GetNumSpecGroups",
