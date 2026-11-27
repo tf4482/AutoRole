@@ -4,7 +4,7 @@
 ## Author: tf4482
 ## Version: @project-version@
 ## IconTexture: Interface/Icons/Ability_DualWield
-## SavedVariablesPerCharacter: AutoRoleDB
+## SavedVariablesPerCharacter: AutoRoleDB, AutoRoleCharDB
 ## X-Curse-Project-ID: 1821845
 
 Output.lua
